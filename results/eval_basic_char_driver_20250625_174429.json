@@ -1,0 +1,103 @@
+{
+  "metadata": {
+    "prompt_id": "basic_char_driver",
+    "model_name": "test_model",
+    "timestamp": "2025-06-25T17:44:29.201321",
+    "code_length": 1524,
+    "difficulty": "beginner"
+  },
+  "scores": {
+    "overall_score": 50.14999999999999,
+    "detailed_metrics": {
+      "compilation": {
+        "success_rate": 0.0,
+        "warnings_count": 0,
+        "errors_count": 1,
+        "weight": 0.4
+      },
+      "functionality": {
+        "basic_operations": 0.75,
+        "error_handling": 0.0,
+        "kernel_api_usage": 1.0,
+        "weight": 0.25
+      },
+      "security": {
+        "buffer_safety": 1.0,
+        "memory_management": 0.0,
+        "input_validation": 1.0,
+        "weight": 0.2
+      },
+      "code_quality": {
+        "style_compliance": 0.46,
+        "documentation": 1.0,
+        "maintainability": 0.46,
+        "weight": 0.1
+      },
+      "advanced_features": {
+        "error_recovery": 1.0,
+        "resource_cleanup": 0.0,
+        "weight": 0.05
+      }
+    },
+    "category_scores": {
+      "compilation": 33.33333333333333,
+      "functionality": 58.333333333333336,
+      "security": 66.66666666666666,
+      "code_quality": 64.0,
+      "advanced_features": 50.0
+    }
+  },
+  "analysis_details": {
+    "compilation": {
+      "success": false,
+      "warnings": 0,
+      "errors": 1,
+      "output": "/tmp/tmp02wl05pi.c:2:10: fatal error: linux/init.h: No such file or directory\n    2 | #include <linux/init.h>\n      |          ^~~~~~~~~~~~~~\ncompilation terminated.\n"
+    },
+    "security": {
+      "issues_found": 0,
+      "issues": [],
+      "score": 100
+    },
+    "style": {
+      "violations": 27,
+      "details": [
+        "Line 15: Use tabs instead of spaces for indentation",
+        "Line 19: Use tabs instead of spaces for indentation",
+        "Line 22: Line too long (102 chars)",
+        "Line 23: Use tabs instead of spaces for indentation",
+        "Line 24: Use tabs instead of spaces for indentation",
+        "Line 25: Use tabs instead of spaces for indentation",
+        "Line 26: Use tabs instead of spaces for indentation",
+        "Line 29: Line too long (109 chars)",
+        "Line 30: Use tabs instead of spaces for indentation",
+        "Line 31: Use tabs instead of spaces for indentation"
+      ],
+      "score": 46
+    },
+    "kernel_patterns": {
+      "patterns_found": 8,
+      "patterns": [
+        "Found pattern: module_init\\s*\\(",
+        "Found pattern: module_exit\\s*\\(",
+        "Found pattern: MODULE_LICENSE\\s*\\(",
+        "Found pattern: MODULE_AUTHOR\\s*\\(",
+        "Found pattern: static\\s+struct\\s+file_operations",
+        "Found pattern: return\\s+-E[A-Z]+",
+        "Proper module init/exit structure",
+        "Module license specified"
+      ],
+      "score": 100
+    },
+    "functionality": {
+      "elements_found": 3,
+      "elements": [
+        "File operations structure defined",
+        "Device registration present",
+        "Proper error codes used"
+      ],
+      "score": 75
+    }
+  },
+  "code_snippet": "// test_driver.c - A simple test driver\n#include <linux/init.h>\n#include <linux/module.h>\n#include <linux/fs.h>\n#include <linux/cdev.h>\n#include <linux/uaccess.h>\n\n#define DEVICE_NAME \"testdriver\"\n#define BUFFER_SIZE 1024\n\nstatic int major_number;\nstatic char device_buffer[BUFFER_SIZE];\n\nstatic int device_open(struct inode *inode, struct file *file) {\n    return 0;\n}\n\nstatic int device_release(struct inode *inode, struct file *file) {\n    return 0;\n}\n\nstatic ssize_t device_read(struct file *file..."
+}

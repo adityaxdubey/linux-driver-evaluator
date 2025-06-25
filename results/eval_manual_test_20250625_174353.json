@@ -1,0 +1,82 @@
+{
+  "metadata": {
+    "prompt_id": "manual_test",
+    "model_name": "manual",
+    "timestamp": "2025-06-25T17:43:53.979823",
+    "code_length": 48,
+    "difficulty": "unknown"
+  },
+  "scores": {
+    "overall_score": 38.33333333333333,
+    "detailed_metrics": {
+      "compilation": {
+        "success_rate": 0.0,
+        "warnings_count": 0,
+        "errors_count": 1,
+        "weight": 0.4
+      },
+      "functionality": {
+        "basic_operations": 0.0,
+        "error_handling": 0.0,
+        "kernel_api_usage": 0.4,
+        "weight": 0.25
+      },
+      "security": {
+        "buffer_safety": 1.0,
+        "memory_management": 0.0,
+        "input_validation": 1.0,
+        "weight": 0.2
+      },
+      "code_quality": {
+        "style_compliance": 1.0,
+        "documentation": 0.5,
+        "maintainability": 1.0,
+        "weight": 0.1
+      },
+      "advanced_features": {
+        "error_recovery": 0.0,
+        "resource_cleanup": 0.0,
+        "weight": 0.05
+      }
+    },
+    "category_scores": {
+      "compilation": 33.33333333333333,
+      "functionality": 13.333333333333334,
+      "security": 66.66666666666666,
+      "code_quality": 83.33333333333334,
+      "advanced_features": 0.0
+    }
+  },
+  "analysis_details": {
+    "compilation": {
+      "success": false,
+      "warnings": 0,
+      "errors": 1,
+      "output": "/tmp/tmpskvi7qwm.c:2:16: error: expected declaration specifiers or \u2018...\u2019 before string constant\n    2 | MODULE_LICENSE(\"GPL\");\n      |                ^~~~~\n"
+    },
+    "security": {
+      "issues_found": 0,
+      "issues": [],
+      "score": 100
+    },
+    "style": {
+      "violations": 0,
+      "details": [],
+      "score": 100
+    },
+    "kernel_patterns": {
+      "patterns_found": 2,
+      "patterns": [
+        "Found pattern: MODULE_LICENSE\\s*\\(",
+        "Module license specified"
+      ],
+      "score": 40
+    },
+    "functionality": {
+      "elements_found": 0,
+      "elements": [],
+      "score": 0
+    }
+  },
+  "code_snippet": "#include <linux/module.h>\nMODULE_LICENSE(\"GPL\");"
+}

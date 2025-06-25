@@ -1,0 +1,90 @@
+{
+  "metadata": {
+    "prompt_id": "sample_bad",
+    "model_name": "sample_test",
+    "timestamp": "2025-06-25T17:43:38.152922",
+    "code_length": 285,
+    "difficulty": "test"
+  },
+  "scores": {
+    "overall_score": 27.200000000000003,
+    "detailed_metrics": {
+      "compilation": {
+        "success_rate": 0.0,
+        "warnings_count": 0,
+        "errors_count": 1,
+        "weight": 0.4
+      },
+      "functionality": {
+        "basic_operations": 0.0,
+        "error_handling": 0.0,
+        "kernel_api_usage": 0.0,
+        "weight": 0.25
+      },
+      "security": {
+        "buffer_safety": 0.55,
+        "memory_management": 0.0,
+        "input_validation": 0.3999999999999999,
+        "weight": 0.2
+      },
+      "code_quality": {
+        "style_compliance": 0.88,
+        "documentation": 0.5,
+        "maintainability": 0.88,
+        "weight": 0.1
+      },
+      "advanced_features": {
+        "error_recovery": 0.0,
+        "resource_cleanup": 0.0,
+        "weight": 0.05
+      }
+    },
+    "category_scores": {
+      "compilation": 33.33333333333333,
+      "functionality": 0.0,
+      "security": 31.666666666666664,
+      "code_quality": 75.33333333333333,
+      "advanced_features": 0.0
+    }
+  },
+  "analysis_details": {
+    "compilation": {
+      "success": false,
+      "warnings": 0,
+      "errors": 1,
+      "output": "In file included from /tmp/tmprqo5e4p4.c:2:\n/usr/include/stdio.h:28:10: fatal error: bits/libc-header-start.h: No such file or directory\n   28 | #include <bits/libc-header-start.h>\n      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~\ncompilation terminated.\n"
+    },
+    "security": {
+      "issues_found": 3,
+      "issues": [
+        "Dangerous function used in kernel space: strcpy",
+        "Dangerous function used in kernel space: gets",
+        "Dangerous function used in kernel space: printf"
+      ],
+      "score": 55
+    },
+    "style": {
+      "violations": 6,
+      "details": [
+        "Line 8: Use tabs instead of spaces for indentation",
+        "Line 9: Use tabs instead of spaces for indentation",
+        "Line 10: Use tabs instead of spaces for indentation",
+        "Line 11: Use tabs instead of spaces for indentation",
+        "Line 12: Use tabs instead of spaces for indentation",
+        "Line 13: Use tabs instead of spaces for indentation"
+      ],
+      "score": 88
+    },
+    "kernel_patterns": {
+      "patterns_found": 0,
+      "patterns": [],
+      "score": 0
+    },
+    "functionality": {
+      "elements_found": 0,
+      "elements": [],
+      "score": 0
+    }
+  },
+  "code_snippet": "\n#include <stdio.h>\n#include <stdlib.h>\n\nchar buffer[1000];\n\nint main() {\n    char input[2000];  // Potential overflow\n    printf(\"Enter data: \");\n    gets(input);  // Dangerous function\n    strcpy(buffer, input);  // No bounds checking\n    printf(\"Data: %s\", buffer);\n    return 0;\n}\n"
+}
