@@ -102,7 +102,7 @@ class CLIEvaluator:
             print()
     
     def _print_evaluation_summary(self, result: Dict):
-        """Print evaluation summary"""
+        """Print enhanced evaluation summary with recommendations"""
         
         print("\n📊 Evaluation Results")
         print("=" * 50)
@@ -115,12 +115,16 @@ class CLIEvaluator:
         print(f"Code Length: {metadata['code_length']} characters")
         print()
         
-        print(f"🎯 Overall Score: {scores['overall_score']:.2f}/100")
+        # Overall score with grade
+        overall = scores['overall_score']
+        grade = self._get_grade(overall)
+        print(f"🎯 Overall Score: {overall:.2f}/100 ({grade})")
         print()
         
         print("📈 Category Scores:")
         for category, score in scores.get('category_scores', {}).items():
-            print(f"  {category.replace('_', ' ').title()}: {score:.1f}/100")
+            bar = self._get_progress_bar(score)
+            print(f"  {category.replace('_', ' ').title()}: {score:.1f}/100 {bar}")
         
         print()
         
@@ -135,6 +139,8 @@ class CLIEvaluator:
                 print(f"  Warnings: {comp['warnings']}")
             if comp.get('errors', 0) > 0:
                 print(f"  Errors: {comp['errors']}")
+            if comp.get('basic_checks_passed'):
+                print(f"  Basic Syntax: ✅ PASS")
         
         if 'security' in analysis:
             sec = analysis['security']
@@ -142,8 +148,44 @@ class CLIEvaluator:
                 print(f"🛡️ Security Issues Found: {sec['issues_found']}")
                 for issue in sec.get('issues', [])[:3]:  # Show first 3
                     print(f"  - {issue}")
+            else:
+                print(f"🛡️ Security: ✅ No major issues found")
+        
+        # Print patterns found
+        if 'kernel_patterns' in analysis:
+            patterns = analysis['kernel_patterns']
+            if patterns.get('patterns_found', 0) > 0:
+                print(f"\n🔧 Kernel Patterns Found ({patterns['patterns_found']}):")
+                for pattern in patterns.get('patterns', [])[:5]:
+                    print(f"  ✅ {pattern}")
+        
+        # Print recommendations
+        recommendations = result.get('recommendations', [])
+        if recommendations:
+            print(f"\n💡 Recommendations for Improvement:")
+            for rec in recommendations[:6]:
+                print(f"  {rec}")
         
         print()
+    
+    def _get_grade(self, score: float) -> str:
+        """Convert score to letter grade"""
+        if score >= 90:
+            return "A"
+        elif score >= 80:
+            return "B"
+        elif score >= 70:
+            return "C"
+        elif score >= 60:
+            return "D"
+        else:
+            return "F"
+    
+    def _get_progress_bar(self, score: float, width: int = 20) -> str:
+        """Generate visual progress bar"""
+        filled = int((score / 100) * width)
+        bar = "█" * filled + "░" * (width - filled)
+        return f"[{bar}]"
 
 def main():
     parser = argparse.ArgumentParser(description='Linux Device Driver Code Evaluator')
@@ -167,12 +209,14 @@ def main():
     elif args.code:
         cli.evaluate_code_string(args.code, args.prompt_id, args.model)
     else:
-        print("Linux Device Driver Code Evaluator")
+        print("🚀 Linux Device Driver Code Evaluator")
+        print("=" * 40)
         print("Use --help for usage information")
         print("\nQuick start:")
         print("  python cli_evaluator.py --sample-tests")
         print("  python cli_evaluator.py --list-prompts")
         print("  python cli_evaluator.py --file mydriver.c")
+        print("  python cli_evaluator.py --file test_driver.c --prompt-id basic_char_driver")
 
 if __name__ == "__main__":
     main()

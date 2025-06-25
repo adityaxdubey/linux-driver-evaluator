@@ -1,0 +1,102 @@
+{
+  "metadata": {
+    "prompt_id": "sample_bad",
+    "model_name": "sample_test",
+    "timestamp": "2025-06-25T17:56:01.961974",
+    "code_length": 285,
+    "difficulty": "test"
+  },
+  "scores": {
+    "overall_score": 44.41666666666667,
+    "detailed_metrics": {
+      "compilation": {
+        "success_rate": 1.0,
+        "warnings_count": 0,
+        "errors_count": 1,
+        "weight": 0.4
+      },
+      "functionality": {
+        "basic_operations": 0.0,
+        "error_handling": 0.4,
+        "kernel_api_usage": 0.0,
+        "weight": 0.25
+      },
+      "security": {
+        "buffer_safety": 0.55,
+        "memory_management": 0.5,
+        "input_validation": 0.55,
+        "weight": 0.2
+      },
+      "code_quality": {
+        "style_compliance": 0.375,
+        "documentation": 0.3,
+        "maintainability": 0.45,
+        "weight": 0.1
+      },
+      "advanced_features": {
+        "error_recovery": 0.0,
+        "resource_cleanup": 0.0,
+        "weight": 0.05
+      }
+    },
+    "category_scores": {
+      "compilation": 66.66666666666666,
+      "functionality": 13.333333333333334,
+      "security": 53.333333333333336,
+      "code_quality": 37.5,
+      "advanced_features": 0.0
+    }
+  },
+  "analysis_details": {
+    "compilation": {
+      "success": true,
+      "warnings": 0,
+      "errors": 1,
+      "output": "In file included from /tmp/tmp4oluxnb6.c:2:\n/usr/include/stdio.h:28:10: fatal error: bits/libc-header-start.h: No such file or directory\n   28 | #include <bits/libc-header-start.h>\n      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~\ncompilation terminated.\n\n",
+      "basic_checks_passed": true
+    },
+    "security": {
+      "issues_found": 3,
+      "issues": [
+        "Dangerous function used in kernel space: strcpy",
+        "Dangerous function used in kernel space: gets",
+        "Dangerous function used in kernel space: printf"
+      ],
+      "good_practices": 1,
+      "score": 45
+    },
+    "style": {
+      "violations": 6,
+      "details": [
+        "Line 8: Consider using tabs for indentation",
+        "Line 9: Consider using tabs for indentation",
+        "Line 10: Consider using tabs for indentation",
+        "Line 11: Consider using tabs for indentation",
+        "Line 12: Consider using tabs for indentation"
+      ],
+      "good_style_points": 1.5000000000000002,
+      "score": 37.5
+    },
+    "kernel_patterns": {
+      "patterns_found": 0,
+      "patterns": [],
+      "score": 0
+    },
+    "functionality": {
+      "elements_found": 0,
+      "elements": [],
+      "score": 0
+    }
+  },
+  "recommendations": [
+    "\ud83d\udee1\ufe0f Address security issues - avoid dangerous functions in kernel space",
+    "   \u2022 Dangerous function used in kernel space: strcpy",
+    "   \u2022 Dangerous function used in kernel space: gets",
+    "\ud83d\udcdd Improve code style - follow Linux kernel coding standards",
+    "   \u2022 Consider line length, indentation, and whitespace",
+    "\u2699\ufe0f Enhance functionality - add missing driver components",
+    "   \u2022 Consider adding file operations, proper init/exit functions",
+    "\ud83d\udd27 Add kernel driver patterns - module_init, module_exit, MODULE_LICENSE"
+  ],
+  "code_snippet": "\n#include <stdio.h>\n#include <stdlib.h>\n\nchar buffer[1000];\n\nint main() {\n    char input[2000];  // Potential overflow\n    printf(\"Enter data: \");\n    gets(input);  // Dangerous function\n    strcpy(buffer, input);  // No bounds checking\n    printf(\"Data: %s\", buffer);\n    return 0;\n}\n"
+}

@@ -1,3 +1,4 @@
+# src/evaluator/main_evaluator.py
 import os
 import json
 import tempfile
@@ -49,6 +50,7 @@ class DriverModelEvaluator:
                     'category_scores': self._get_category_scores(metrics)
                 },
                 'analysis_details': analysis_results,
+                'recommendations': self._generate_recommendations(analysis_results),
                 'code_snippet': code[:500] + "..." if len(code) > 500 else code
             }
             
@@ -70,37 +72,103 @@ class DriverModelEvaluator:
         """Calculate comprehensive metrics from analysis results"""
         metrics = DriverEvaluationMetrics()
         
-        # Compilation metrics
+        # Compilation metrics (improved)
         compilation = analysis_results.get('compilation', {})
-        metrics.metrics['compilation']['success_rate'] = 1.0 if compilation.get('success', False) else 0.0
+        success_rate = 1.0 if compilation.get('success', False) else 0.0
+        # Give partial credit if basic checks pass
+        if compilation.get('basic_checks_passed', False):
+            success_rate = max(success_rate, 0.7)
+        
+        metrics.metrics['compilation']['success_rate'] = success_rate
         metrics.metrics['compilation']['warnings_count'] = compilation.get('warnings', 0)
         metrics.metrics['compilation']['errors_count'] = compilation.get('errors', 0)
         
-        # Security metrics
+        # Security metrics (enhanced)
         security = analysis_results.get('security', {})
-        metrics.metrics['security']['buffer_safety'] = security.get('score', 0) / 100.0
-        metrics.metrics['security']['memory_management'] = 1.0 if 'kmalloc' in str(analysis_results) and 'kfree' in str(analysis_results) else 0.0
-        metrics.metrics['security']['input_validation'] = 1.0 if security.get('issues_found', 0) == 0 else max(0, 1.0 - security.get('issues_found', 0) * 0.2)
+        base_security = security.get('score', 0) / 100.0
+        # Bonus for good practices
+        good_practices_bonus = security.get('good_practices', 0) * 0.1
         
-        # Code quality metrics
+        metrics.metrics['security']['buffer_safety'] = min(1.0, base_security + good_practices_bonus)
+        metrics.metrics['security']['memory_management'] = 1.0 if 'kmalloc' in str(analysis_results) and 'kfree' in str(analysis_results) else 0.5
+        metrics.metrics['security']['input_validation'] = 1.0 if security.get('issues_found', 0) == 0 else max(0.3, 1.0 - security.get('issues_found', 0) * 0.15)
+        
+        # Code quality metrics (enhanced)
         style = analysis_results.get('style', {})
-        metrics.metrics['code_quality']['style_compliance'] = style.get('score', 0) / 100.0
-        metrics.metrics['code_quality']['documentation'] = 1.0 if 'MODULE_AUTHOR' in str(analysis_results) else 0.5
-        metrics.metrics['code_quality']['maintainability'] = min(1.0, style.get('score', 0) / 100.0)
+        base_style = style.get('score', 0) / 100.0
         
-        # Functionality metrics
+        metrics.metrics['code_quality']['style_compliance'] = base_style
+        metrics.metrics['code_quality']['documentation'] = 1.0 if 'MODULE_AUTHOR' in str(analysis_results) else 0.8 if 'MODULE_LICENSE' in str(analysis_results) else 0.3
+        metrics.metrics['code_quality']['maintainability'] = min(1.0, base_style + style.get('good_style_points', 0) * 0.05)
+        
+        # Functionality metrics (enhanced)
         functionality = analysis_results.get('functionality', {})
         kernel_patterns = analysis_results.get('kernel_patterns', {})
         
         metrics.metrics['functionality']['basic_operations'] = functionality.get('score', 0) / 100.0
-        metrics.metrics['functionality']['error_handling'] = 1.0 if 'return -E' in str(analysis_results) else 0.0
+        metrics.metrics['functionality']['error_handling'] = 1.0 if 'return -E' in str(analysis_results) else 0.4
         metrics.metrics['functionality']['kernel_api_usage'] = kernel_patterns.get('score', 0) / 100.0
         
-        # Advanced features
-        metrics.metrics['advanced_features']['error_recovery'] = 1.0 if functionality.get('elements_found', 0) > 2 else 0.0
-        metrics.metrics['advanced_features']['resource_cleanup'] = 1.0 if 'kfree' in str(analysis_results) or 'unregister' in str(analysis_results) else 0.0
+        # Advanced features (enhanced)
+        advanced_score = 0.0
+        if functionality.get('elements_found', 0) > 3:
+            advanced_score += 0.5
+        if 'static' in str(analysis_results):
+            advanced_score += 0.3
+        if any(pattern in str(analysis_results) for pattern in ['__init', '__exit', 'DEVICE_NAME']):
+            advanced_score += 0.2
+        
+        metrics.metrics['advanced_features']['error_recovery'] = min(1.0, advanced_score)
+        metrics.metrics['advanced_features']['resource_cleanup'] = 1.0 if any(cleanup in str(analysis_results) for cleanup in ['kfree', 'unregister', 'free_irq', 'iounmap']) else 0.0
         
         return metrics
+    
+    def _generate_recommendations(self, analysis_results: Dict) -> List[str]:
+        """Generate improvement recommendations"""
+        recommendations = []
+        
+        # Compilation issues
+        compilation = analysis_results.get('compilation', {})
+        if not compilation.get('success', False):
+            recommendations.append("🔧 Fix compilation errors - ensure proper kernel headers and syntax")
+            if compilation.get('errors', 0) > 0:
+                recommendations.append("🔧 Check for missing includes, unmatched braces, or syntax errors")
+        
+        # Security improvements
+        security = analysis_results.get('security', {})
+        if security.get('issues_found', 0) > 0:
+            recommendations.append("🛡️ Address security issues - avoid dangerous functions in kernel space")
+            for issue in security.get('issues', [])[:2]:
+                recommendations.append(f"   • {issue}")
+        
+        # Style improvements
+        style = analysis_results.get('style', {})
+        if style.get('score', 100) < 70:
+            recommendations.append("📝 Improve code style - follow Linux kernel coding standards")
+            if style.get('violations', 0) > 5:
+                recommendations.append("   • Consider line length, indentation, and whitespace")
+        
+        # Functionality suggestions
+        functionality = analysis_results.get('functionality', {})
+        if functionality.get('score', 100) < 60:
+            recommendations.append("⚙️ Enhance functionality - add missing driver components")
+            if functionality.get('elements_found', 0) < 3:
+                recommendations.append("   • Consider adding file operations, proper init/exit functions")
+        
+        # Pattern suggestions
+        kernel_patterns = analysis_results.get('kernel_patterns', {})
+        if kernel_patterns.get('score', 100) < 60:
+            recommendations.append("🔧 Add kernel driver patterns - module_init, module_exit, MODULE_LICENSE")
+        
+        # General improvements
+        if not any('MODULE_LICENSE' in str(result) for result in analysis_results.values()):
+            recommendations.append("📜 Add MODULE_LICENSE declaration")
+        
+        if not any('error handling' in rec.lower() for rec in recommendations):
+            if 'return -E' not in str(analysis_results):
+                recommendations.append("🚨 Add proper error handling with kernel error codes (-ENOMEM, -EFAULT, etc.)")
+        
+        return recommendations[:8]  # Limit to top 8 recommendations
     
     def _get_category_scores(self, metrics: DriverEvaluationMetrics) -> Dict[str, float]:
         """Get individual category scores"""

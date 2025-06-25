@@ -1,0 +1,270 @@
+{
+  "summary": {
+    "model_name": "sample_test",
+    "total_samples": 2,
+    "successful_evaluations": 2,
+    "timestamp": "2025-06-25T17:56:01.962807"
+  },
+  "overall_performance": {
+    "average_score": 57.93333333333333,
+    "min_score": 44.41666666666667,
+    "max_score": 71.44999999999999,
+    "score_distribution": {
+      "excellent (90-100)": 0,
+      "good (70-89)": 1,
+      "fair (50-69)": 0,
+      "poor (0-49)": 1
+    }
+  },
+  "category_analysis": {
+    "compilation": {
+      "average": 66.66666666666666,
+      "min": 66.66666666666666,
+      "max": 66.66666666666666,
+      "samples": 2
+    },
+    "functionality": {
+      "average": 46.666666666666664,
+      "min": 13.333333333333334,
+      "max": 80.0,
+      "samples": 2
+    },
+    "security": {
+      "average": 68.33333333333334,
+      "min": 53.333333333333336,
+      "max": 83.33333333333334,
+      "samples": 2
+    },
+    "code_quality": {
+      "average": 53.08333333333333,
+      "min": 37.5,
+      "max": 68.66666666666666,
+      "samples": 2
+    },
+    "advanced_features": {
+      "average": 12.5,
+      "min": 0.0,
+      "max": 25.0,
+      "samples": 2
+    }
+  },
+  "detailed_results": [
+    {
+      "metadata": {
+        "prompt_id": "sample_good",
+        "model_name": "sample_test",
+        "timestamp": "2025-06-25T17:56:01.949833",
+        "code_length": 1725,
+        "difficulty": "test"
+      },
+      "scores": {
+        "overall_score": 71.44999999999999,
+        "detailed_metrics": {
+          "compilation": {
+            "success_rate": 1.0,
+            "warnings_count": 0,
+            "errors_count": 1,
+            "weight": 0.4
+          },
+          "functionality": {
+            "basic_operations": 1.0,
+            "error_handling": 0.4,
+            "kernel_api_usage": 1.0,
+            "weight": 0.25
+          },
+          "security": {
+            "buffer_safety": 1.0,
+            "memory_management": 0.5,
+            "input_validation": 1.0,
+            "weight": 0.2
+          },
+          "code_quality": {
+            "style_compliance": 0.7599999999999996,
+            "documentation": 0.3,
+            "maintainability": 1.0,
+            "weight": 0.1
+          },
+          "advanced_features": {
+            "error_recovery": 0.5,
+            "resource_cleanup": 0.0,
+            "weight": 0.05
+          }
+        },
+        "category_scores": {
+          "compilation": 66.66666666666666,
+          "functionality": 80.0,
+          "security": 83.33333333333334,
+          "code_quality": 68.66666666666666,
+          "advanced_features": 25.0
+        }
+      },
+      "analysis_details": {
+        "compilation": {
+          "success": true,
+          "warnings": 0,
+          "errors": 1,
+          "output": "/tmp/tmpl2s66ng_.c:2:10: fatal error: linux/init.h: No such file or directory\n    2 | #include <linux/init.h>\n      |          ^~~~~~~~~~~~~~\ncompilation terminated.\n\n",
+          "basic_checks_passed": true
+        },
+        "security": {
+          "issues_found": 0,
+          "issues": [],
+          "good_practices": 5,
+          "score": 100
+        },
+        "style": {
+          "violations": 34,
+          "details": [
+            "Line 17: Consider using tabs for indentation",
+            "Line 21: Consider using tabs for indentation",
+            "Line 24: Very long line (102 chars)",
+            "Line 25: Consider using tabs for indentation",
+            "Line 26: Consider using tabs for indentation"
+          ],
+          "good_style_points": 13.19999999999999,
+          "score": 75.99999999999996
+        },
+        "kernel_patterns": {
+          "patterns_found": 14,
+          "patterns": [
+            "Module initialization function",
+            "Module cleanup function",
+            "Module license declaration",
+            "File operations structure",
+            "User space data copying",
+            "Kernel to user space copying",
+            "Character device registration",
+            "Proper device cleanup",
+            "Proper error codes",
+            "Static function/variable declarations",
+            "Init section annotation",
+            "Exit section annotation",
+            "Device name constant",
+            "Buffer size constant"
+          ],
+          "score": 100
+        },
+        "functionality": {
+          "elements_found": 7,
+          "elements": [
+            "File operations structure defined",
+            "Device open function",
+            "Device release function",
+            "Device read function",
+            "Device write function",
+            "Proper error codes used",
+            "Dynamic memory management"
+          ],
+          "score": 100
+        }
+      },
+      "recommendations": [
+        "\ud83d\udcdc Add MODULE_LICENSE declaration",
+        "\ud83d\udea8 Add proper error handling with kernel error codes (-ENOMEM, -EFAULT, etc.)"
+      ],
+      "code_snippet": "\n#include <linux/init.h>\n#include <linux/module.h>\n#include <linux/fs.h>\n#include <linux/cdev.h>\n#include <linux/uaccess.h>\n#include <linux/slab.h>\n\n#define DEVICE_NAME \"mydriver\"\n#define BUFFER_SIZE 1024\n\nstatic int major_number;\nstatic struct cdev my_cdev;\nstatic char *device_buffer;\n\nstatic int device_open(struct inode *inode, struct file *file) {\n    return 0;\n}\n\nstatic int device_release(struct inode *inode, struct file *file) {\n    return 0;\n}\n\nstatic ssize_t device_read(struct file *file,..."
+    },
+    {
+      "metadata": {
+        "prompt_id": "sample_bad",
+        "model_name": "sample_test",
+        "timestamp": "2025-06-25T17:56:01.961974",
+        "code_length": 285,
+        "difficulty": "test"
+      },
+      "scores": {
+        "overall_score": 44.41666666666667,
+        "detailed_metrics": {
+          "compilation": {
+            "success_rate": 1.0,
+            "warnings_count": 0,
+            "errors_count": 1,
+            "weight": 0.4
+          },
+          "functionality": {
+            "basic_operations": 0.0,
+            "error_handling": 0.4,
+            "kernel_api_usage": 0.0,
+            "weight": 0.25
+          },
+          "security": {
+            "buffer_safety": 0.55,
+            "memory_management": 0.5,
+            "input_validation": 0.55,
+            "weight": 0.2
+          },
+          "code_quality": {
+            "style_compliance": 0.375,
+            "documentation": 0.3,
+            "maintainability": 0.45,
+            "weight": 0.1
+          },
+          "advanced_features": {
+            "error_recovery": 0.0,
+            "resource_cleanup": 0.0,
+            "weight": 0.05
+          }
+        },
+        "category_scores": {
+          "compilation": 66.66666666666666,
+          "functionality": 13.333333333333334,
+          "security": 53.333333333333336,
+          "code_quality": 37.5,
+          "advanced_features": 0.0
+        }
+      },
+      "analysis_details": {
+        "compilation": {
+          "success": true,
+          "warnings": 0,
+          "errors": 1,
+          "output": "In file included from /tmp/tmp4oluxnb6.c:2:\n/usr/include/stdio.h:28:10: fatal error: bits/libc-header-start.h: No such file or directory\n   28 | #include <bits/libc-header-start.h>\n      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~\ncompilation terminated.\n\n",
+          "basic_checks_passed": true
+        },
+        "security": {
+          "issues_found": 3,
+          "issues": [
+            "Dangerous function used in kernel space: strcpy",
+            "Dangerous function used in kernel space: gets",
+            "Dangerous function used in kernel space: printf"
+          ],
+          "good_practices": 1,
+          "score": 45
+        },
+        "style": {
+          "violations": 6,
+          "details": [
+            "Line 8: Consider using tabs for indentation",
+            "Line 9: Consider using tabs for indentation",
+            "Line 10: Consider using tabs for indentation",
+            "Line 11: Consider using tabs for indentation",
+            "Line 12: Consider using tabs for indentation"
+          ],
+          "good_style_points": 1.5000000000000002,
+          "score": 37.5
+        },
+        "kernel_patterns": {
+          "patterns_found": 0,
+          "patterns": [],
+          "score": 0
+        },
+        "functionality": {
+          "elements_found": 0,
+          "elements": [],
+          "score": 0
+        }
+      },
+      "recommendations": [
+        "\ud83d\udee1\ufe0f Address security issues - avoid dangerous functions in kernel space",
+        "   \u2022 Dangerous function used in kernel space: strcpy",
+        "   \u2022 Dangerous function used in kernel space: gets",
+        "\ud83d\udcdd Improve code style - follow Linux kernel coding standards",
+        "   \u2022 Consider line length, indentation, and whitespace",
+        "\u2699\ufe0f Enhance functionality - add missing driver components",
+        "   \u2022 Consider adding file operations, proper init/exit functions",
+        "\ud83d\udd27 Add kernel driver patterns - module_init, module_exit, MODULE_LICENSE"
+      ],
+      "code_snippet": "\n#include <stdio.h>\n#include <stdlib.h>\n\nchar buffer[1000];\n\nint main() {\n    char input[2000];  // Potential overflow\n    printf(\"Enter data: \");\n    gets(input);  // Dangerous function\n    strcpy(buffer, input);  // No bounds checking\n    printf(\"Data: %s\", buffer);\n    return 0;\n}\n"
+    }
+  ]
+}
