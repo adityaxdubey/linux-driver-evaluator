@@ -1,0 +1,99 @@
+{
+  "metadata": {
+    "prompt_id": "proc_interface",
+    "model_name": "mock-gpt",
+    "timestamp": "2025-06-27T12:07:57.695770",
+    "code_length": 388,
+    "difficulty": "unknown"
+  },
+  "scores": {
+    "overall_score": 60.15000000000001,
+    "detailed_metrics": {
+      "compilation": {
+        "success_rate": 1.0,
+        "warnings_count": 0,
+        "errors_count": 1,
+        "weight": 0.4
+      },
+      "functionality": {
+        "basic_operations": 0.0,
+        "error_handling": 0.4,
+        "kernel_api_usage": 0.8,
+        "weight": 0.25
+      },
+      "security": {
+        "buffer_safety": 1.0,
+        "memory_management": 0.5,
+        "input_validation": 1.0,
+        "weight": 0.2
+      },
+      "code_quality": {
+        "style_compliance": 0.745,
+        "documentation": 0.3,
+        "maintainability": 1.0,
+        "weight": 0.1
+      },
+      "advanced_features": {
+        "error_recovery": 0.0,
+        "resource_cleanup": 0.0,
+        "weight": 0.05
+      }
+    },
+    "category_scores": {
+      "compilation": 66.66666666666666,
+      "functionality": 40.00000000000001,
+      "security": 83.33333333333334,
+      "code_quality": 68.16666666666666,
+      "advanced_features": 0.0
+    }
+  },
+  "analysis_details": {
+    "compilation": {
+      "success": true,
+      "warnings": 0,
+      "errors": 1,
+      "output": "/tmp/tmp7yymj2iq.c:1:10: fatal error: linux/init.h: No such file or directory\n    1 | #include <linux/init.h>\n      |          ^~~~~~~~~~~~~~\ncompilation terminated.\n\n",
+      "basic_checks_passed": true
+    },
+    "security": {
+      "issues_found": 0,
+      "issues": [],
+      "good_practices": 1,
+      "score": 90
+    },
+    "style": {
+      "violations": 3,
+      "details": [
+        "Line 6: Consider using tabs for indentation",
+        "Line 7: Consider using tabs for indentation",
+        "Line 12: Consider using tabs for indentation"
+      ],
+      "good_style_points": 5.9,
+      "score": 74.5
+    },
+    "kernel_patterns": {
+      "patterns_found": 6,
+      "patterns": [
+        "Module initialization function",
+        "Module cleanup function",
+        "Module license declaration",
+        "Static function/variable declarations",
+        "Init section annotation",
+        "Exit section annotation"
+      ],
+      "score": 80
+    },
+    "functionality": {
+      "elements_found": 0,
+      "elements": [],
+      "score": 0
+    }
+  },
+  "recommendations": [
+    "\u2699\ufe0f Enhance functionality - add missing driver components",
+    "   \u2022 Consider adding file operations, proper init/exit functions",
+    "\ud83d\udcdc Add MODULE_LICENSE declaration",
+    "\ud83d\udea8 Add proper error handling with kernel error codes (-ENOMEM, -EFAULT, etc.)"
+  ],
+  "code_snippet": "#include <linux/init.h>\n#include <linux/module.h>\n\nstatic int __init basic_init(void)\n{\n    printk(KERN_INFO \"Basic driver loaded\\n\");\n    return 0;\n}\n\nstatic void __exit basic_exit(void)\n{\n    printk(KERN_INFO \"Basic driver unloaded\\n\");\n}\n\nmodule_init(basic_init);\nmodule_exit(basic_exit);\nMODULE_LICENSE(\"GPL\");\nMODULE_AUTHOR(\"AI Generated\");\nMODULE_DESCRIPTION(\"Basic kernel module\");"
+}
