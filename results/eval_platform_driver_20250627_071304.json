@@ -1,0 +1,105 @@
+{
+  "metadata": {
+    "prompt_id": "platform_driver",
+    "model_name": "mock-gpt",
+    "timestamp": "2025-06-27T07:13:04.404777",
+    "code_length": 841,
+    "difficulty": "unknown"
+  },
+  "scores": {
+    "overall_score": 60.683333333333344,
+    "detailed_metrics": {
+      "compilation": {
+        "success_rate": 1.0,
+        "warnings_count": 0,
+        "errors_count": 1,
+        "weight": 0.4
+      },
+      "functionality": {
+        "basic_operations": 0.1,
+        "error_handling": 0.4,
+        "kernel_api_usage": 0.8,
+        "weight": 0.25
+      },
+      "security": {
+        "buffer_safety": 1.0,
+        "memory_management": 0.5,
+        "input_validation": 1.0,
+        "weight": 0.2
+      },
+      "code_quality": {
+        "style_compliance": 0.655,
+        "documentation": 0.3,
+        "maintainability": 1.0,
+        "weight": 0.1
+      },
+      "advanced_features": {
+        "error_recovery": 0.0,
+        "resource_cleanup": 0.0,
+        "weight": 0.05
+      }
+    },
+    "category_scores": {
+      "compilation": 66.66666666666666,
+      "functionality": 43.333333333333336,
+      "security": 83.33333333333334,
+      "code_quality": 65.16666666666667,
+      "advanced_features": 0.0
+    }
+  },
+  "analysis_details": {
+    "compilation": {
+      "success": true,
+      "warnings": 0,
+      "errors": 1,
+      "output": "/tmp/tmpizlawere.c:1:10: fatal error: linux/init.h: No such file or directory\n    1 | #include <linux/init.h>\n      |          ^~~~~~~~~~~~~~\ncompilation terminated.\n\n",
+      "basic_checks_passed": true
+    },
+    "security": {
+      "issues_found": 0,
+      "issues": [],
+      "good_practices": 1,
+      "score": 90
+    },
+    "style": {
+      "violations": 9,
+      "details": [
+        "Line 11: Consider using tabs for indentation",
+        "Line 16: Consider using tabs for indentation",
+        "Line 20: Consider using tabs for indentation",
+        "Line 21: Consider using tabs for indentation",
+        "Line 22: Consider using tabs for indentation"
+      ],
+      "good_style_points": 10.100000000000001,
+      "score": 65.5
+    },
+    "kernel_patterns": {
+      "patterns_found": 6,
+      "patterns": [
+        "Module initialization function",
+        "Module cleanup function",
+        "Module license declaration",
+        "Static function/variable declarations",
+        "Init section annotation",
+        "Exit section annotation"
+      ],
+      "score": 80
+    },
+    "functionality": {
+      "elements_found": 1,
+      "elements": [
+        "Resource registration/cleanup"
+      ],
+      "score": 10
+    }
+  },
+  "recommendations": [
+    "\ud83d\udcdd Improve code style - follow Linux kernel coding standards",
+    "   \u2022 Consider line length, indentation, and whitespace",
+    "\u2699\ufe0f Enhance functionality - add missing driver components",
+    "   \u2022 Consider adding file operations, proper init/exit functions",
+    "\ud83d\udcdc Add MODULE_LICENSE declaration",
+    "\ud83d\udea8 Add proper error handling with kernel error codes (-ENOMEM, -EFAULT, etc.)"
+  ],
+  "code_snippet": "#include <linux/init.h>\n#include <linux/module.h>\n#include <linux/platform_device.h>\n#include <linux/io.h>\n#include <linux/interrupt.h>\n\n#define DRIVER_NAME \"platform_driver\"\n\nstatic int platform_probe(struct platform_device *pdev)\n{\n    return 0;\n}\n\nstatic int platform_remove(struct platform_device *pdev)\n{\n    return 0;\n}\n\nstatic struct platform_driver my_platform_driver = {\n    .probe = platform_probe,\n    .remove = platform_remove,\n    .driver = {\n        .name = DRIVER_NAME,\n    },\n};\n\nstat..."
+}
