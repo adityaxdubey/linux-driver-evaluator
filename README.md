@@ -55,4 +55,5 @@ This project evaluates the quality of Linux device driver code—especially code
 - **Security**: Checks for safe coding patterns and dangerous calls (20%)
 - **Code Quality**: Style, maintainability, documentation (10%)
 - **Advanced Features**: Modern kernel patterns, robust cleanup (5%)
-# Linux Device Driver Coding Model Evaluation System
+
+_See [AI_USAGE.md](AI_Usage.md) for a disclosure on AI coding assistance._
