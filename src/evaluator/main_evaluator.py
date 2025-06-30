@@ -1,9 +1,8 @@
-# src/evaluator/main_evaluator.py
 import os
 import json
 import tempfile
 from datetime import datetime
-from typing import Dict, List, Any
+from typing import Dict, List
 import sys
 sys.path.append('..')
 
@@ -18,24 +17,14 @@ class DriverModelEvaluator:
         self.evaluation_history = []
     
     def evaluate_single_code(self, code: str, prompt_info: Dict, model_name: str = "unknown") -> Dict:
-        """Evaluate a single piece of generated driver code"""
-        
-        print(f"\n🔍 Evaluating code for prompt: {prompt_info.get('id', 'unknown')}")
-        
-        # Create temporary file for the code
+        print(f"evaluating code for prompt: {prompt_info.get('id', 'unknown')}")
         with tempfile.NamedTemporaryFile(mode='w', suffix='.c', delete=False) as temp_file:
             temp_file.write(code)
             temp_filepath = temp_file.name
-        
         try:
-            # Run static analysis
-            print("  📊 Running static analysis...")
+            print("running static analysis...")
             analysis_results = self.analyzer.analyze_file(temp_filepath)
-            
-            # Calculate comprehensive metrics
             metrics = self._calculate_comprehensive_metrics(analysis_results, prompt_info)
-            
-            # Create evaluation result
             evaluation_result = {
                 'metadata': {
                     'prompt_id': prompt_info.get('id', 'unknown'),
@@ -53,18 +42,12 @@ class DriverModelEvaluator:
                 'recommendations': self._generate_recommendations(analysis_results),
                 'code_snippet': code[:500] + "..." if len(code) > 500 else code
             }
-            
-            # Save individual result
             result_filename = f"{self.output_dir}/eval_{prompt_info.get('id', 'unknown')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
             with open(result_filename, 'w') as f:
                 json.dump(evaluation_result, f, indent=2)
-            
-            print(f"  ✅ Overall Score: {evaluation_result['scores']['overall_score']:.2f}/100")
-            
+            print(f"overall score: {evaluation_result['scores']['overall_score']:.2f}/100")
             return evaluation_result
-            
         finally:
-            # Clean up temporary file
             if os.path.exists(temp_filepath):
                 os.unlink(temp_filepath)
     

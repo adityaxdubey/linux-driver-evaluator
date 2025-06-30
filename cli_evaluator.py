@@ -1,17 +1,9 @@
-# cli_evaluator.py
-#!/usr/bin/env python3
-"""
-Linux Device Driver Code Evaluator CLI
-Usage: python cli_evaluator.py [options]
-"""
-
 import argparse
 import sys
 import os
 import json
-from typing import List, Dict
+from typing import Dict, List
 
-# Add src to path
 sys.path.append('src')
 sys.path.append('.')
 
@@ -23,21 +15,17 @@ class CLIEvaluator:
         self.evaluator = DriverModelEvaluator()
     
     def evaluate_file(self, filepath: str, prompt_id: str = None, model_name: str = "manual"):
-        """Evaluate a single code file"""
-        
         if not os.path.exists(filepath):
-            print(f"❌ Error: File {filepath} not found!")
+            print(f"error: file {filepath} not found!")
             return
         
-        # Read code from file
         try:
             with open(filepath, 'r') as f:
                 code = f.read()
         except Exception as e:
-            print(f"❌ Error reading file: {str(e)}")
+            print(f"error reading file: {str(e)}")
             return
         
-        # Find prompt info or create default
         prompt_info = {'id': prompt_id or 'manual_test', 'difficulty': 'unknown'}
         
         if prompt_id:
@@ -46,15 +34,10 @@ class CLIEvaluator:
                     prompt_info = prompt
                     break
         
-        # Evaluate
         result = self.evaluator.evaluate_single_code(code, prompt_info, model_name)
-        
-        # Print summary
         self._print_evaluation_summary(result)
     
     def evaluate_code_string(self, code: str, prompt_id: str = None, model_name: str = "manual"):
-        """Evaluate code from string"""
-        
         prompt_info = {'id': prompt_id or 'manual_test', 'difficulty': 'unknown'}
         
         if prompt_id:
@@ -67,9 +50,7 @@ class CLIEvaluator:
         self._print_evaluation_summary(result)
     
     def run_sample_tests(self):
-        """Run evaluation on built-in sample codes"""
-        
-        print("🧪 Running Sample Test Cases")
+        print("running sample tests")
         print("=" * 50)
         
         samples = [
@@ -85,116 +66,98 @@ class CLIEvaluator:
         
         report = self.evaluator.batch_evaluate(samples, "sample_test")
         
-        print(f"\n📊 Sample Test Results:")
-        print(f"Average Score: {report['overall_performance']['average_score']:.2f}")
-        print(f"Score Range: {report['overall_performance']['min_score']:.2f} - {report['overall_performance']['max_score']:.2f}")
+        print(f"\nsample test results:")
+        print(f"avg score: {report['overall_performance']['average_score']:.2f}")
+        print(f"score range: {report['overall_performance']['min_score']:.2f} - {report['overall_performance']['max_score']:.2f}")
     
     def list_prompts(self):
-        """List available sample prompts"""
-        
-        print("\n📋 Available Sample Prompts:")
+        print("\navailable sample prompts:")
         print("=" * 40)
         
         for i, prompt in enumerate(SAMPLE_PROMPTS, 1):
-            print(f"{i}. ID: {prompt['id']}")
-            print(f"   Difficulty: {prompt['difficulty']}")
-            print(f"   Description: {prompt['prompt'][:100]}...")
+            print(f"{i}. id: {prompt['id']}")
+            print(f"   difficulty: {prompt['difficulty']}")
+            print(f"   desc: {prompt['prompt'][:100]}...")
             print()
     
     def _print_evaluation_summary(self, result: Dict):
-        """Print enhanced evaluation summary with recommendations"""
-        
-        print("\n📊 Evaluation Results")
+        print("\nevaluation results")
         print("=" * 50)
         
         metadata = result['metadata']
         scores = result['scores']
         
-        print(f"Prompt ID: {metadata['prompt_id']}")
-        print(f"Model: {metadata['model_name']}")
-        print(f"Code Length: {metadata['code_length']} characters")
+        print(f"prompt id: {metadata['prompt_id']}")
+        print(f"model: {metadata['model_name']}")
+        print(f"code length: {metadata['code_length']} chars")
         print()
         
-        # Overall score with grade
         overall = scores['overall_score']
         grade = self._get_grade(overall)
-        print(f"🎯 Overall Score: {overall:.2f}/100 ({grade})")
+        print(f"overall score: {overall:.2f}/100 ({grade})")
         print()
         
-        print("📈 Category Scores:")
+        print("category scores:")
         for category, score in scores.get('category_scores', {}).items():
-            bar = self._get_progress_bar(score)
-            print(f"  {category.replace('_', ' ').title()}: {score:.1f}/100 {bar}")
+            print(f"  {category.replace('_', ' ').title()}: {score:.1f}/100")
         
         print()
         
-        # Print key findings
         analysis = result['analysis_details']
         
         if 'compilation' in analysis:
             comp = analysis['compilation']
-            status = "✅ PASS" if comp.get('success') else "❌ FAIL"
-            print(f"🔧 Compilation: {status}")
+            status = "pass" if comp.get('success') else "fail"
+            print(f"compilation: {status}")
             if comp.get('warnings', 0) > 0:
-                print(f"  Warnings: {comp['warnings']}")
+                print(f"  warnings: {comp['warnings']}")
             if comp.get('errors', 0) > 0:
-                print(f"  Errors: {comp['errors']}")
+                print(f"  errors: {comp['errors']}")
             if comp.get('basic_checks_passed'):
-                print(f"  Basic Syntax: ✅ PASS")
+                print(f"  basic syntax: pass")
         
         if 'security' in analysis:
             sec = analysis['security']
             if sec.get('issues_found', 0) > 0:
-                print(f"🛡️ Security Issues Found: {sec['issues_found']}")
-                for issue in sec.get('issues', [])[:3]:  # Show first 3
+                print(f"security issues found: {sec['issues_found']}")
+                for issue in sec.get('issues', [])[:3]:
                     print(f"  - {issue}")
             else:
-                print(f"🛡️ Security: ✅ No major issues found")
+                print(f"security: no major issues found")
         
-        # Print patterns found
         if 'kernel_patterns' in analysis:
             patterns = analysis['kernel_patterns']
             if patterns.get('patterns_found', 0) > 0:
-                print(f"\n🔧 Kernel Patterns Found ({patterns['patterns_found']}):")
+                print(f"\nkernel patterns found ({patterns['patterns_found']}):")
                 for pattern in patterns.get('patterns', [])[:5]:
-                    print(f"  ✅ {pattern}")
+                    print(f"  - {pattern}") # Use hyphen for list
         
-        # Print recommendations
         recommendations = result.get('recommendations', [])
         if recommendations:
-            print(f"\n💡 Recommendations for Improvement:")
+            print(f"\nrecommendations:")
             for rec in recommendations[:6]:
-                print(f"  {rec}")
+                print(f"  - {rec}") # Use hyphen for list
         
         print()
     
     def _get_grade(self, score: float) -> str:
-        """Convert score to letter grade"""
-        if score >= 90:
-            return "A"
-        elif score >= 80:
-            return "B"
-        elif score >= 70:
-            return "C"
-        elif score >= 60:
-            return "D"
-        else:
-            return "F"
+        if score >= 90: return "a"
+        elif score >= 80: return "b"
+        elif score >= 70: return "c"
+        elif score >= 60: return "d"
+        else: return "f"
     
     def _get_progress_bar(self, score: float, width: int = 20) -> str:
-        """Generate visual progress bar"""
-        filled = int((score / 100) * width)
-        bar = "█" * filled + "░" * (width - filled)
-        return f"[{bar}]"
+        return "" 
 
 def main():
-    parser = argparse.ArgumentParser(description='Linux Device Driver Code Evaluator')
-    parser.add_argument('--file', '-f', help='Evaluate code from file')
-    parser.add_argument('--prompt-id', '-p', help='Specify prompt ID for context')
-    parser.add_argument('--model', '-m', default='manual', help='Model name for tracking')
-    parser.add_argument('--sample-tests', '-s', action='store_true', help='Run built-in sample tests')
-    parser.add_argument('--list-prompts', '-l', action='store_true', help='List available prompts')
-    parser.add_argument('--code', '-c', help='Evaluate code from command line string')
+    parser = argparse.ArgumentParser(description='linux driver code evaluator')
+    parser.add_argument('--file', '-f', help='evaluate code from file')
+    parser.add_argument('--prompt-id', '-p', help='prompt id for context')
+    parser.add_argument('--model', '-m', default='manual', help='model name for tracking')
+    parser.add_argument('--sample-tests', '-s', action='store_true', help='run built-in sample tests')
+    parser.add_argument('--list-prompts', '-l', action='store_true', help='list available prompts')
+    parser.add_argument('--code', '-c', help='evaluate code from command line string')
     
     args = parser.parse_args()
     
@@ -209,10 +172,10 @@ def main():
     elif args.code:
         cli.evaluate_code_string(args.code, args.prompt_id, args.model)
     else:
-        print("🚀 Linux Device Driver Code Evaluator")
+        print("linux driver code evaluator")
         print("=" * 40)
-        print("Use --help for usage information")
-        print("\nQuick start:")
+        print("use --help for usage")
+        print("\nquick start:")
         print("  python cli_evaluator.py --sample-tests")
         print("  python cli_evaluator.py --list-prompts")
         print("  python cli_evaluator.py --file mydriver.c")
