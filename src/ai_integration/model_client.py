@@ -1,30 +1,58 @@
-import openai
 import time
 import json
+import requests
 from typing import Dict, List, Optional
 
-class AIModelClient:
-    def __init__(self, api_key: str = None, model_name: str = "gpt-3.5-turbo"):
+try:
+    import openai
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+
+try:
+    import google.generativeai as genai
+    GEMINI_AVAILABLE = True
+except ImportError:
+    GEMINI_AVAILABLE = False
+
+class MultiModelClient:
+    def __init__(self, model_type: str = "mock", api_key: str = None):
+        self.model_type = model_type.lower()
         self.api_key = api_key
-        self.model_name = model_name
-        if api_key:
+        
+        if self.model_type == "openai" and OPENAI_AVAILABLE and api_key:
             openai.api_key = api_key
+        elif self.model_type == "gemini" and GEMINI_AVAILABLE and api_key:
+            genai.configure(api_key=api_key)
+        
+    def generate_driver_code(self, prompt: str, max_tokens: int = 2048) -> Dict:
+        """generate driver code using selected model"""
+        
+        if self.model_type == "openai":
+            return self._generate_openai(prompt, max_tokens)
+        elif self.model_type == "gemini":
+            return self._generate_gemini(prompt, max_tokens)
+        else:
+            return self._generate_mock(prompt)
     
-    def generate_driver_code(self, prompt: str, max_tokens: int = 1500) -> Dict:
-        """Generate Linux driver code using AI model"""
+    def _generate_openai(self, prompt: str, max_tokens: int) -> Dict:
+        """generate code using openai"""
+        if not OPENAI_AVAILABLE or not self.api_key:
+            return {"success": False, "error": "openai not available or no api key"}
+        
         try:
-            system_prompt = """You are an expert Linux kernel developer. 
-Generate clean, working Linux device driver code following kernel coding standards.
-Include proper error handling, memory management, and module structure."""
+            system_prompt = """you are an expert linux kernel developer. 
+generate clean, working linux device driver code following kernel coding standards.
+include proper error handling, memory management, and module structure."""
             
             response = openai.ChatCompletion.create(
-                model=self.model_name,
+                model="gpt-3.5-turbo",
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=max_tokens,
-                temperature=0.1  # Lower temperature for more consistent code
+                temperature=0.1
             )
             
             code = response.choices[0].message.content
@@ -32,42 +60,81 @@ Include proper error handling, memory management, and module structure."""
             return {
                 "success": True,
                 "code": code,
-                "model": self.model_name,
+                "model": "gpt-3.5-turbo",
                 "tokens_used": response.usage.total_tokens
             }
             
         except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "code": None
-            }
+            return {"success": False, "error": str(e), "code": None}
     
-    def batch_generate(self, prompts: List[str], delay: float = 1.0) -> List[Dict]:
-        """Generate code for multiple prompts with rate limiting"""
-        results = []
+    def _generate_gemini(self, prompt: str, max_tokens: int) -> Dict:
+        """generate code using google gemini with multiple model fallbacks"""
+        if not GEMINI_AVAILABLE or not self.api_key:
+            return {"success": False, "error": "gemini not available or no api key"}
         
-        for i, prompt in enumerate(prompts):
-            print(f"Generating code for prompt {i+1}/{len(prompts)}")
-            
-            result = self.generate_driver_code(prompt)
-            results.append(result)
-            
-            if i < len(prompts) - 1:  # Don't delay after last prompt
-                time.sleep(delay)
+        # updated model list as requested
+        model_names = [
+            "gemini-2.5-flash",
+            "gemini-2.0-flash",
+            "gemini-pro",
+            "models/gemini-2.5-flash",
+            "models/gemini-2.0-flash",
+            "models/gemini-pro"
+        ]
         
-        return results
+        # define safety settings to be less restrictive
+        safety_settings = {
+            'HARM_CATEGORY_HARASSMENT': 'BLOCK_NONE',
+            'HARM_CATEGORY_HATE_SPEECH': 'BLOCK_NONE',
+            'HARM_CATEGORY_SEXUALLY_EXPLICIT': 'BLOCK_NONE',
+            'HARM_CATEGORY_DANGEROUS_CONTENT': 'BLOCK_NONE',
+        }
+        
+        full_prompt = f"""you are an expert linux kernel developer. 
+generate clean, working linux device driver code following kernel coding standards.
+include proper error handling, memory management, and module structure.
 
-class MockAIClient:
-    """Mock client for testing without API keys"""
-    
-    def __init__(self, model_name: str = "mock-model"):
-        self.model_name = model_name
-    
-    def generate_driver_code(self, prompt: str, max_tokens: int = 1500) -> Dict:
-        """Generate mock driver code for testing"""
+user request: {prompt}
+
+provide only the c code without explanations."""
+
+        for model_name in model_names:
+            try:
+                print(f"trying gemini model: {model_name}")
+                model = genai.GenerativeModel(model_name)
+                
+                response = model.generate_content(
+                    full_prompt,
+                    generation_config=genai.types.GenerationConfig(
+                        max_output_tokens=max_tokens,
+                        temperature=0.1,
+                    ),
+                    safety_settings=safety_settings  # pass safety settings here
+                )
+                
+                # more robust check for content before accessing response.text
+                if response.parts:
+                    return {
+                        "success": True,
+                        "code": response.text,
+                        "model": model_name,
+                        "tokens_used": len(response.text.split())
+                    }
+                else:
+                    # this handles the case where the response was blocked
+                    finish_reason = response.candidates[0].finish_reason if response.candidates else "unknown"
+                    print(f"model {model_name} returned empty response. finish_reason: {finish_reason}")
+                    
+            except Exception as e:
+                print(f"model {model_name} failed: {str(e)}")
+                continue
         
-        # Simple template based on prompt keywords
+        # if all models fail
+        return {"success": False, "error": "all gemini models failed or returned no content"}
+    
+    def _generate_mock(self, prompt: str) -> Dict:
+        """generate mock driver code for testing"""
+        
         if "character" in prompt.lower():
             code = self._get_char_driver_template()
         elif "platform" in prompt.lower():
@@ -78,18 +145,22 @@ class MockAIClient:
         return {
             "success": True,
             "code": code,
-            "model": self.model_name,
+            "model": "mock-generator",
             "tokens_used": 500
         }
     
-    def batch_generate(self, prompts: List[str], delay: float = 0.1) -> List[Dict]:
-        """Generate mock code for multiple prompts"""
+    def batch_generate(self, prompts: List[str], delay: float = 1.0) -> List[Dict]:
+        """generate code for multiple prompts"""
         results = []
         
-        for prompt in prompts:
+        for i, prompt in enumerate(prompts):
+            print(f"generating code for prompt {i+1}/{len(prompts)}")
+            
             result = self.generate_driver_code(prompt)
             results.append(result)
-            time.sleep(delay)
+            
+            if i < len(prompts) - 1 and self.model_type != "mock":
+                time.sleep(delay)
         
         return results
     
@@ -162,15 +233,13 @@ static void __exit driver_exit(void)
 module_init(driver_init);
 module_exit(driver_exit);
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("AI Generated");
-MODULE_DESCRIPTION("Character device driver");'''
+MODULE_AUTHOR("ai generated");
+MODULE_DESCRIPTION("character device driver");'''
     
     def _get_platform_driver_template(self) -> str:
         return '''#include <linux/init.h>
 #include <linux/module.h>
 #include <linux/platform_device.h>
-#include <linux/io.h>
-#include <linux/interrupt.h>
 
 #define DRIVER_NAME "platform_driver"
 
@@ -205,8 +274,8 @@ static void __exit driver_exit(void)
 module_init(driver_init);
 module_exit(driver_exit);
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("AI Generated");
-MODULE_DESCRIPTION("Platform device driver");'''
+MODULE_AUTHOR("ai generated");
+MODULE_DESCRIPTION("platform device driver");'''
     
     def _get_basic_driver_template(self) -> str:
         return '''#include <linux/init.h>
@@ -214,17 +283,17 @@ MODULE_DESCRIPTION("Platform device driver");'''
 
 static int __init basic_init(void)
 {
-    printk(KERN_INFO "Basic driver loaded\\n");
+    printk(KERN_INFO "basic driver loaded\\n");
     return 0;
 }
 
 static void __exit basic_exit(void)
 {
-    printk(KERN_INFO "Basic driver unloaded\\n");
+    printk(KERN_INFO "basic driver unloaded\\n");
 }
 
 module_init(basic_init);
 module_exit(basic_exit);
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("AI Generated");
-MODULE_DESCRIPTION("Basic kernel module");'''
+MODULE_AUTHOR("ai generated");
+MODULE_DESCRIPTION("basic kernel module");'''
