@@ -3,11 +3,13 @@ import json
 import os
 from datetime import datetime
 from typing import Dict, List
+
 sys.path.append('..')
 
 from ..analyzers.clang_analyzer import EnhancedClangAnalyzer
 from ..analyzers.runtime_tester import KernelModuleTester
 from ..analyzers.performance_profiler import PerformanceProfiler
+from ..analyzers.runtime_profiler import RuntimePerformanceProfiler
 from ..analyzers.security_scanner import SecurityVulnerabilityScanner
 from ..analyzers.static_analyzer import KernelCodeAnalyzer
 
@@ -16,12 +18,11 @@ class MasterDriverEvaluator:
         self.clang_analyzer = EnhancedClangAnalyzer(kernel_headers_path)
         self.runtime_tester = KernelModuleTester()
         self.performance_profiler = PerformanceProfiler()
+        self.runtime_profiler = RuntimePerformanceProfiler()
         self.security_scanner = SecurityVulnerabilityScanner()
         self.fallback_analyzer = KernelCodeAnalyzer()
         
     def comprehensive_evaluation(self, code: str, prompt_info: Dict) -> Dict:
-        """run all analysis modules and combine results"""
-        
         print(f"running master evaluation for: {prompt_info.get('id', 'unknown')}")
         
         evaluation_result = {
@@ -29,71 +30,72 @@ class MasterDriverEvaluator:
                 'prompt_id': prompt_info.get('id', 'unknown'),
                 'timestamp': datetime.now().isoformat(),
                 'code_length': len(code),
-                'analysis_modules': ['clang', 'runtime', 'performance', 'security']
+                'analysis_modules': ['clang', 'runtime_compile', 'performance_static', 'runtime_perf', 'security']
             },
             'module_results': {},
             'integrated_scores': {},
             'overall_assessment': {}
         }
         
-        # run each analysis module
-        print("1/4 running clang static analysis...")
+        # 1. Clang analysis
+        print("1/5 running clang static analysis...")
         clang_results = self.clang_analyzer.analyze_code_detailed(code)
         evaluation_result['module_results']['clang'] = clang_results
         
-        print("2/4 running runtime compilation test...")
+        # 2. Runtime compilation test
+        print("2/5 running runtime compilation test...")
         runtime_results = self.runtime_tester.test_module_compilation(code)
         evaluation_result['module_results']['runtime'] = runtime_results
-        
-        print("3/4 running performance analysis...")
+
+        # 3. Performance static analysis
+        print("3/5 running static performance analysis...")
         performance_results = self.performance_profiler.analyze_performance_patterns(code)
         evaluation_result['module_results']['performance'] = performance_results
         
-        print("4/4 running security vulnerability scan...")
+        # 4. Runtime performance profiling
+        print("4/5 running runtime performance profiling...")
+        runtime_perf_results = self.runtime_profiler.analyze_runtime_performance(code)
+        evaluation_result['module_results']['runtime_performance'] = runtime_perf_results
+        
+        # 5. Security scanning
+        print("5/5 running security vulnerability scan...")
         security_results = self.security_scanner.scan_vulnerabilities(code)
         evaluation_result['module_results']['security'] = security_results
         
-        # integrate all scores
+        # Integrate all scores
         evaluation_result['integrated_scores'] = self._calculate_integrated_scores(evaluation_result['module_results'])
-        
-        # generate overall assessment
         evaluation_result['overall_assessment'] = self._generate_overall_assessment(evaluation_result)
-        
-        # save comprehensive report
         self._save_comprehensive_report(evaluation_result)
-        
         return evaluation_result
     
     def _calculate_integrated_scores(self, module_results: Dict) -> Dict:
-        """combine scores from all modules with intelligent weighting"""
-        
-        # extract individual scores
         clang_score = module_results.get('clang', {}).get('summary', {}).get('clang_score', 0)
         runtime_score = 100 if module_results.get('runtime', {}).get('compilation_success', False) else 0
         performance_score = module_results.get('performance', {}).get('performance_score', 0)
+        runtime_perf_score = module_results.get('runtime_performance', {}).get('runtime_performance_score', 0)
         security_score = module_results.get('security', {}).get('security_score', 0)
         
-        # intelligent weighting based on criticality
+        # Adjust weights as needed based on what you want to emphasize
         weights = {
-            'security': 0.30,      # security is most critical
-            'runtime': 0.25,       # must compile and work
-            'clang': 0.25,         # professional code quality
-            'performance': 0.20    # optimization important but not critical
+            'security': 0.27,
+            'runtime_compile': 0.18,
+            'clang': 0.18,
+            'performance_static': 0.17,
+            'runtime_perf': 0.20,
         }
-        
-        # calculate weighted overall score
         overall_score = (
             security_score * weights['security'] +
-            runtime_score * weights['runtime'] +
+            runtime_score * weights['runtime_compile'] +
             clang_score * weights['clang'] +
-            performance_score * weights['performance']
+            performance_score * weights['performance_static'] +
+            runtime_perf_score * weights['runtime_perf']
         )
-        
         return {
             'individual_scores': {
                 'clang_static_analysis': clang_score,
                 'runtime_compilation': runtime_score,
-                'performance_analysis': performance_score,
+                'performance_static': performance_score,
+                'runtime_performance': runtime_perf_score,
                 'security_analysis': security_score
             },
             'weights_used': weights,
@@ -102,63 +104,31 @@ class MasterDriverEvaluator:
         }
     
     def _generate_overall_assessment(self, evaluation_result: Dict) -> Dict:
-        """generate comprehensive assessment with actionable insights"""
-        
         overall_score = evaluation_result['integrated_scores']['overall_score']
         module_results = evaluation_result['module_results']
-        
-        # determine overall quality level
         if overall_score >= 90:
             quality_level = "production_ready"
-            summary = "excellent code quality, ready for production use"
+            summary = "Excellent quality, safe for deployment"
         elif overall_score >= 75:
             quality_level = "good_with_minor_issues"
-            summary = "good code quality, minor improvements needed"
+            summary = "Mostly solid, needs small improvements"
         elif overall_score >= 60:
             quality_level = "needs_improvement"
-            summary = "functional but requires significant improvements"
+            summary = "Needs fixes before deployment"
         else:
             quality_level = "poor"
-            summary = "major issues detected, substantial rework required"
-        
-        # generate priority recommendations
+            summary = "Major issues, not safe for use"
         priority_actions = []
-        
-        # security first
+        # Security first
         security_vulns = module_results.get('security', {}).get('total_vulnerabilities', 0)
         if security_vulns > 0:
-            priority_actions.append({
-                'priority': 'critical',
-                'category': 'security',
-                'action': f"fix {security_vulns} security vulnerabilities immediately"
-            })
-        
-        # runtime issues
+            priority_actions.append({'priority': 'critical', 'category': 'security', 'action': f"fix {security_vulns} security vulnerabilities"})
         if not module_results.get('runtime', {}).get('compilation_success', False):
-            priority_actions.append({
-                'priority': 'critical', 
-                'category': 'compilation',
-                'action': "fix compilation errors before deployment"
-            })
-        
-        # performance issues
-        perf_score = module_results.get('performance', {}).get('performance_score', 100)
-        if perf_score < 70:
-            priority_actions.append({
-                'priority': 'important',
-                'category': 'performance',
-                'action': "optimize performance bottlenecks"
-            })
-        
-        # code quality issues
-        clang_issues = module_results.get('clang', {}).get('summary', {}).get('total_issues', 0)
-        if clang_issues > 10:
-            priority_actions.append({
-                'priority': 'moderate',
-                'category': 'code_quality',
-                'action': f"address {clang_issues} code quality issues"
-            })
-        
+            priority_actions.append({'priority': 'critical', 'category': 'compilation', 'action': "fix compilation errors"})
+        if module_results.get('performance', {}).get('performance_score', 100) < 70:
+            priority_actions.append({'priority': 'important', 'category': 'performance', 'action': "address performance issues"})
+        if module_results.get('clang', {}).get('summary', {}).get('total_issues', 0) > 10:
+            priority_actions.append({'priority': 'moderate', 'category': 'code_quality', 'action': "address code quality issues"})
         return {
             'quality_level': quality_level,
             'summary': summary,
@@ -192,28 +162,20 @@ class MasterDriverEvaluator:
     def _get_next_steps(self, priority_actions: List[Dict]) -> List[str]:
         if not priority_actions:
             return ["code quality is excellent, consider adding documentation"]
-        
         steps = []
         critical = [a for a in priority_actions if a['priority'] == 'critical']
         important = [a for a in priority_actions if a['priority'] == 'important']
-        
         if critical:
             steps.append(f"immediately address {len(critical)} critical issues")
         if important:
             steps.append(f"plan to fix {len(important)} important issues")
-        
         steps.append("rerun evaluation after fixes")
         steps.append("consider peer code review")
-        
         return steps
     
     def _save_comprehensive_report(self, evaluation_result: Dict):
-        """save detailed report"""
-        import os
         os.makedirs('results', exist_ok=True)
-        
         filename = f"results/comprehensive_evaluation_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
         with open(filename, 'w') as f:
             json.dump(evaluation_result, f, indent=2)
-        
         print(f"comprehensive report saved: {filename}")
