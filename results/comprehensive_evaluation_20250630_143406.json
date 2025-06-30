@@ -1,0 +1,206 @@
+{
+  "metadata": {
+    "prompt_id": "test_driver.c",
+    "timestamp": "2025-06-30T14:34:06.231051",
+    "code_length": 1524,
+    "analysis_modules": [
+      "clang",
+      "runtime",
+      "performance",
+      "security"
+    ]
+  },
+  "module_results": {
+    "clang": {
+      "clang_available": true,
+      "analysis_successful": true,
+      "issues": [
+        {
+          "severity": "error",
+          "type": "clang-diagnostic-error",
+          "line": 2,
+          "column": 10,
+          "message": "'linux/init.h' file not found",
+          "category": "general",
+          "file_path": "/home/admin123/linux-driver-evaluator/tmp8g8lcee5.c",
+          "suggestion": "review and fix according to best practices"
+        },
+        {
+          "severity": "warning",
+          "type": "misc-unused-parameters",
+          "line": 14,
+          "column": 38,
+          "message": "parameter 'inode' is unused",
+          "category": "reliability",
+          "file_path": "\n    2 | #include <linux/init.h>\n      |          ^~~~~~~~~~~~~~\n/home/admin123/linux-driver-evaluator/tmp8g8lcee5.c",
+          "suggestion": "add (void)param_name; to mark as intentionally unused"
+        },
+        {
+          "severity": "warning",
+          "type": "misc-unused-parameters",
+          "line": 14,
+          "column": 58,
+          "message": "parameter 'file' is unused",
+          "category": "reliability",
+          "file_path": " this fix will not be applied because it overlaps with another fix\n/home/admin123/linux-driver-evaluator/tmp8g8lcee5.c",
+          "suggestion": "add (void)param_name; to mark as intentionally unused"
+        },
+        {
+          "severity": "warning",
+          "type": "misc-unused-parameters",
+          "line": 18,
+          "column": 41,
+          "message": "parameter 'inode' is unused",
+          "category": "reliability",
+          "file_path": " this fix will not be applied because it overlaps with another fix\n/home/admin123/linux-driver-evaluator/tmp8g8lcee5.c",
+          "suggestion": "add (void)param_name; to mark as intentionally unused"
+        },
+        {
+          "severity": "warning",
+          "type": "misc-unused-parameters",
+          "line": 18,
+          "column": 61,
+          "message": "parameter 'file' is unused",
+          "category": "reliability",
+          "file_path": " this fix will not be applied because it overlaps with another fix\n/home/admin123/linux-driver-evaluator/tmp8g8lcee5.c",
+          "suggestion": "add (void)param_name; to mark as intentionally unused"
+        },
+        {
+          "severity": "warning",
+          "type": "misc-unused-parameters",
+          "line": 22,
+          "column": 41,
+          "message": "parameter 'file' is unused",
+          "category": "reliability",
+          "file_path": " this fix will not be applied because it overlaps with another fix\n/home/admin123/linux-driver-evaluator/tmp8g8lcee5.c",
+          "suggestion": "add (void)param_name; to mark as intentionally unused"
+        },
+        {
+          "severity": "warning",
+          "type": "misc-unused-parameters",
+          "line": 29,
+          "column": 42,
+          "message": "parameter 'file' is unused",
+          "category": "reliability",
+          "file_path": "\n   22 | static ssize_t device_read(struct file *file, char __user *user_buffer, size_t size, loff_t *offset) {\n      |                            ~~~~~~~~~~~~~^~~~~\n/home/admin123/linux-driver-evaluator/tmp8g8lcee5.c",
+          "suggestion": "add (void)param_name; to mark as intentionally unused"
+        }
+      ],
+      "summary": {
+        "total_issues": 7,
+        "by_severity": {
+          "error": 1,
+          "warning": 6,
+          "note": 0
+        },
+        "by_category": {
+          "security": 0,
+          "memory": 0,
+          "performance": 0,
+          "style": 0,
+          "reliability": 6,
+          "general": 1
+        },
+        "critical_issues": 1,
+        "clang_score": 73
+      },
+      "recommendations": [
+        {
+          "priority": "important",
+          "count": 6,
+          "description": "fix unused parameters and variables"
+        }
+      ]
+    },
+    "runtime": {
+      "compilation_success": false,
+      "build_output": "make -C /lib/modules/5.15.153.1-microsoft-standard-WSL2/build M=/tmp/tmptb3i9qkh modules\nmake[1]: *** /lib/modules/5.15.153.1-microsoft-standard-WSL2/build: No such file or directory.  Stop.\nmake: *** [Makefile:7: default] Error 2\n",
+      "module_created": false,
+      "build_time": "measured"
+    },
+    "performance": {
+      "algorithmic_complexity": {
+        "max_nesting_level": 0,
+        "max_complexity": 0,
+        "complex_functions": []
+      },
+      "memory_patterns": {
+        "total_allocations": 0,
+        "total_deallocations": 0,
+        "large_allocations": 0,
+        "risk_factors": 0
+      },
+      "io_patterns": {
+        "blocking_operations": 2,
+        "dma_operations": 0,
+        "io_complexity": 2
+      },
+      "locking_analysis": {
+        "lock_operations": 0,
+        "unlock_operations": 0,
+        "potential_deadlocks": 0
+      },
+      "performance_score": 94
+    },
+    "security": {
+      "total_vulnerabilities": 1,
+      "by_severity": {
+        "critical": 0,
+        "high": 0,
+        "medium": 0,
+        "low": 1
+      },
+      "vulnerabilities": [
+        {
+          "type": "uninitialized_variable",
+          "severity": "low",
+          "cwe": "CWE-457",
+          "line": 11,
+          "match": "static int major_number;",
+          "line_content": "static int major_number;",
+          "recommendation": "initialize variables at declaration"
+        }
+      ],
+      "security_score": 97
+    }
+  },
+  "integrated_scores": {
+    "individual_scores": {
+      "clang_static_analysis": 73,
+      "runtime_compilation": 0,
+      "performance_analysis": 94,
+      "security_analysis": 97
+    },
+    "weights_used": {
+      "security": 0.3,
+      "runtime": 0.25,
+      "clang": 0.25,
+      "performance": 0.2
+    },
+    "overall_score": 66.15,
+    "grade": "d+"
+  },
+  "overall_assessment": {
+    "quality_level": "needs_improvement",
+    "summary": "functional but requires significant improvements",
+    "overall_score": 66.15,
+    "priority_actions": [
+      {
+        "priority": "critical",
+        "category": "security",
+        "action": "fix 1 security vulnerabilities immediately"
+      },
+      {
+        "priority": "critical",
+        "category": "compilation",
+        "action": "fix compilation errors before deployment"
+      }
+    ],
+    "deployment_recommendation": "development_only_fix_issues_first",
+    "next_steps": [
+      "immediately address 2 critical issues",
+      "rerun evaluation after fixes",
+      "consider peer code review"
+    ]
+  }
+}
