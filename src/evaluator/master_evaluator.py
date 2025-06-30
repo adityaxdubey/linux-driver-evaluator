@@ -11,8 +11,9 @@ from ..analyzers.runtime_tester import KernelModuleTester
 from ..analyzers.performance_profiler import PerformanceProfiler
 from ..analyzers.runtime_profiler import RuntimePerformanceProfiler
 from ..analyzers.security_scanner import SecurityVulnerabilityScanner
-from ..analyzers.static_analyzer import KernelCodeAnalyzer
-
+#from ..analyzers.static_analyzer import KernelCodeAnalyzer
+from ..analyzers.ast_static_analyzer import AdvancedStaticAnalyzer
+from ..evaluator.llm_evaluator import LLMBasedEvaluator
 class MasterDriverEvaluator:
     def __init__(self, kernel_headers_path: str = None):
         self.clang_analyzer = EnhancedClangAnalyzer(kernel_headers_path)
@@ -20,8 +21,9 @@ class MasterDriverEvaluator:
         self.performance_profiler = PerformanceProfiler()
         self.runtime_profiler = RuntimePerformanceProfiler()
         self.security_scanner = SecurityVulnerabilityScanner()
-        self.fallback_analyzer = KernelCodeAnalyzer()
-        
+ #       self.fallback_analyzer = KernelCodeAnalyzer()
+        self.advanced_static_analyzer = AdvancedStaticAnalyzer()
+        self.llm_evaluator = LLMBasedEvaluator()
     def comprehensive_evaluation(self, code: str, prompt_info: Dict) -> Dict:
         print(f"running master evaluation for: {prompt_info.get('id', 'unknown')}")
         
@@ -67,7 +69,16 @@ class MasterDriverEvaluator:
         evaluation_result['overall_assessment'] = self._generate_overall_assessment(evaluation_result)
         self._save_comprehensive_report(evaluation_result)
         return evaluation_result
-    
+	# Advanced Static Analysis
+        print("running advanced static analysis...")
+        static_results = self.advanced_static_analyzer.deep_static_analysis(code)
+        evaluation_result['module_results']['advanced_static'] = static_results
+
+       # LLM Evaluation (requires prompt and generation info)
+        if prompt_info.get('llm_generated'):
+                print("running LLM-based evaluation...")
+                llm_results = self.llm_evaluator.evaluate_generated_code(code, prompt_info.get('prompt', ''), prompt_info.get('model_metadata', {}))
+                evaluation_result['module_results']['llm'] = llm_results    
     def _calculate_integrated_scores(self, module_results: Dict) -> Dict:
         clang_score = module_results.get('clang', {}).get('summary', {}).get('clang_score', 0)
         runtime_score = 100 if module_results.get('runtime', {}).get('compilation_success', False) else 0
