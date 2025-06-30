@@ -9,6 +9,7 @@ This system is particularly useful for benchmarking AI-generated code, but can b
 - **Professional Static Analysis**: Integrates Clang-Tidy to find bugs, style violations, and performance issues using industry-standard checks.
 - **Runtime Compilation Testing**: Verifies that the driver code actually compiles as a kernel module.
 - **Security Vulnerability Scanning**: Identifies common security anti-patterns and potential vulnerabilities.
+- **Runtime**: Measures real execution time and can detect memory leaks or misuse (optionally with `valgrind`).
 - **Performance & Complexity Analysis**: Analyzes code for nested loops, complex functions, and inefficient patterns.
 - **AI Model Benchmarking**: A built-in pipeline to generate code from AI models (Gemini, OpenAI, or a mock) and evaluate it automatically.
 - **Unified Command-Line Interface**: A single, clean entry point (`main.py`) for all functionality.
